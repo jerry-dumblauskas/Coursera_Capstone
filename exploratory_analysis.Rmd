@@ -81,7 +81,7 @@ library(RWeka)
 now let's create the plot data:
 ```{r}
 
-# Top N variable
+# Top N variables
 datapoints <- 40
 
 get_freq <- function(tdm) 
@@ -92,7 +92,9 @@ get_freq <- function(tdm)
 
 bigram <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
 trigram <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
-make_plot <- function(data, label) {
+
+make_plot <- function(data, label) 
+{
   ggplot(data[1:datapoints,], aes(reorder(word, -freq), freq)) +
     labs(x = label, y = "Count") +
     theme(axis.text.x = element_text(angle = 75, hjust = 1, size = 14)) +
@@ -100,16 +102,16 @@ make_plot <- function(data, label) {
 }
 
 # Get freqs (uni, bi and tri)
-freq1 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora), 0.99))
-freq2 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora, control = list(tokenize = bigram)), 0.99))
-freq3 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora, control = list(tokenize = trigram)), 0.99))
+freq1 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora), 0.999))
+freq2 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora, control = list(tokenize = bigram)), 0.999))
+freq3 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora, control = list(tokenize = trigram)), 0.9999))
 ```
 
 and let's look at the graphs
 ```{r}
-make_plot(freq3, paste(datapoints ,"Highest Number of Triples in the Sample set"))
-make_plot(freq2, paste(datapoints ,"Highest Number of Doubles in the Sample set"))
-make_plot(freq1, paste(datapoints ,"Highest Number of Singles in the Sample set"))
+make_plot(freq3, paste(datapoints ,"Top Triples in the Sample set"))
+make_plot(freq2, paste(datapoints ,"Top Doubles in the Sample set"))
+make_plot(freq1, paste(datapoints ,"Top Singles in the Sample set"))
 ```
 
 
