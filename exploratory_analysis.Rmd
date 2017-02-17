@@ -105,12 +105,12 @@ freq3 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora, control = list(t
 
 and let's look at the graphs
 ```{r}
-makePlot(freq3, paste(datapoints ," Most Common Trigrams"))
-makePlot(freq2, paste(datapoints ," Most Common Bigrams"))
-makePlot(freq1, paste(datapoints ," Most Common Unigrams"))
+makePlot(freq3, paste(datapoints ," Most Common Triples in the Sample set"))
+makePlot(freq2, paste(datapoints ," Most Common Doubles in the Sample set"))
+makePlot(freq1, paste(datapoints ," Most Common Single in the Sample set"))
 ```
 
 
 ## Observations and Next Steps
 
-This is a start on creating a predictive algorithm.  
+This is a start on creating a predictive algorithm.  At this point I am not worried about processing power.  Going to up to 3 previous words doesn't stress a standard workstation heavily.  We'll want to build this set of Ngrams and create function that can be called by a client, which will pass in a string.  We'll parse this string and send back a result based on the greatest number of tokenized strings passed in.  Our trick will be to make this responsive to a calling client.
