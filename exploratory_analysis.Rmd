@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction and Goals
 
-This is an analysis report for the Coursera Data Science Capstone project. The goal of this analysis is to create a predictive text model using a large text repository of documents as training data. Basic R techniques will be used to perform the analysis and build the groundwork for an eventual predictive model.
+This is an analysis report for the Coursera Data Science Capstone project. The goal of this analysis is to come up with some ideas for a predictive text model using a large text repository of documents as training data. Basic R techniques will be used to perform the analysis and build the groundwork for an eventual predictive model.
 
 This report describes the major features of the training data with our exploratory data analysis and summarizes plans for creating the predictive model.
 
