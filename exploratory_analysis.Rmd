@@ -1,5 +1,5 @@
 ---
-title: "Exploratory Analysis"
+title: "Exploratory Analysis to build a word prediction function"
 author: "Jerry Dumblauskas"
 date: "February 17, 2017"
 output: html_document
@@ -11,19 +11,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction and Goals
 
-This is an analysis report for the Coursera Data Science Capstone project. The goal of this analysis is to create a predictive text model using a large text repository of documents as training data. Basic R techniques will be used to perform the analysis and build the predictive model.
+This is an analysis report for the Coursera Data Science Capstone project. The goal of this analysis is to create a predictive text model using a large text repository of documents as training data. Basic R techniques will be used to perform the analysis and build the groundwork for an eventual predictive model.
 
 This report describes the major features of the training data with our exploratory data analysis and summarizes plans for creating the predictive model.
 
 
 ## Analysis
 ### 1) Get the Data
-Here is code for getting the data.  This set is huge, so don't run it unless you mean it!  Change the XXX to d396qusza40orc if you want to run
+Here is code for getting the data.  This set is huge, so don't run it unless you mean it!  Change the XXX to d396qusza40orc if you want to run it.
 
 ```{r}
-if (!file.exists("Coursera-SwiftKey.zip")) {
-  download.file("https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip", destfile="Coursera-SwiftKey.zip")
-  unzip("Coursera-SwiftKey.zip")
+my_file<-"Coursera-SwiftKey.zip"
+if (!file.exists(my_file)) {
+  download.file("https://XXX.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip", destfile=my_file)
+  unzip(my_file)
 }
 ```
 
@@ -41,7 +42,7 @@ object.size(news)
 object.size(twitter)
 ```
 
-Not going to try and cut down on the size that much.  We will use bigger machines/processing here to get the job done.
+We are not going to worry about the size that much.  We will use bigger machines/processing here to get the job done.
 
 ### 2) Clean the Data
 Here, we will use the tm package as per the class.  Documentation is at: <https://cran.r-project.org/web/packages/tm/tm.pdf>
@@ -52,20 +53,18 @@ We'll take 1 percent of the data as a sample.  We also need to strip out emojis!
 library(tm)
 
 set.seed(4322)
-data.sample <- c(sample(blogs, length(blogs) * 0.01),
-                 sample(news, length(news) * 0.01),
-                 sample(twitter, length(twitter) * 0.01))
+sample_data <- c(sample(blogs, length(blogs) * 0.01), sample(news, length(news) * 0.01), sample(twitter, length(twitter) * 0.01))
 
 # Create corpora and clean the data
-corpora <- VCorpus(VectorSource(data.sample))
+corpora <- VCorpus(VectorSource(sample_data))
 to_space <- content_transformer(function(x, pattern) gsub(pattern, " ", x))
 corpora <- tm_map(corpora, to_space, "(f|ht)tp(s?)://(.*)[.][a-z]+")
 corpora <- tm_map(corpora, to_space, "@[^\\s]+")
 corpora <- tm_map(corpora, function(x) iconv(enc2utf8(x$content), sub = "byte"))
 corpora <- tm_map(corpora, tolower)
 corpora <- tm_map(corpora, removeWords, stopwords("en"))
-corpora <- tm_map(corpora, removePunctuation)
 corpora <- tm_map(corpora, removeNumbers)
+corpora <- tm_map(corpora, removePunctuation)
 corpora <- tm_map(corpora, stripWhitespace)
 corpora <- tm_map(corpora, PlainTextDocument)
 ```
@@ -75,42 +74,47 @@ corpora <- tm_map(corpora, PlainTextDocument)
 As a first step, let's look at 3, 2 and 1 level 'grams' AKA trigrams, bigrams and unigrams.  From the class notes we'll use the Rweka package to help (and of course ggplot2)
 
 ```{r}
-library(RWeka)
 library(ggplot2)
+library(RWeka)
 ```
 
 now let's create the plot data:
 ```{r}
 
+# Top N variable
 datapoints <- 40
 
-get_freq <- function(tdm) {
+get_freq <- function(tdm) 
+{
   freq <- sort(rowSums (as.matrix(tdm)), decreasing = TRUE)
   return(data.frame(word = names(freq), freq = freq))
 }
+
 bigram <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
 trigram <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
-makePlot <- function(data, label) {
+make_plot <- function(data, label) {
   ggplot(data[1:datapoints,], aes(reorder(word, -freq), freq)) +
     labs(x = label, y = "Count") +
-    theme(axis.text.x = element_text(angle = 60, size = 12, hjust = 1)) +
+    theme(axis.text.x = element_text(angle = 75, hjust = 1, size = 14)) +
     geom_bar(stat = "identity", fill = I("grey30"))
 }
 
 # Get freqs (uni, bi and tri)
-freq1 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora), 0.9999))
-freq2 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora, control = list(tokenize = bigram)), 0.9999))
-freq3 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora, control = list(tokenize = trigram)), 0.9999))
+freq1 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora), 0.99))
+freq2 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora, control = list(tokenize = bigram)), 0.99))
+freq3 <- get_freq(removeSparseTerms(TermDocumentMatrix(corpora, control = list(tokenize = trigram)), 0.99))
 ```
 
 and let's look at the graphs
 ```{r}
-makePlot(freq3, paste(datapoints ," Most Common Triples in the Sample set"))
-makePlot(freq2, paste(datapoints ," Most Common Doubles in the Sample set"))
-makePlot(freq1, paste(datapoints ," Most Common Single in the Sample set"))
+make_plot(freq3, paste(datapoints ,"Highest Number of Triples in the Sample set"))
+make_plot(freq2, paste(datapoints ,"Highest Number of Doubles in the Sample set"))
+make_plot(freq1, paste(datapoints ,"Highest Number of Singles in the Sample set"))
 ```
 
 
 ## Observations and Next Steps
 
-This is a start on creating a predictive algorithm.  At this point I am not worried about processing power.  Going to up to 3 previous words doesn't stress a standard workstation heavily.  We'll want to build this set of Ngrams and create function that can be called by a client, which will pass in a string.  We'll parse this string and send back a result based on the greatest number of tokenized strings passed in.  Our trick will be to make this responsive to a calling client.
+This is a start on creating a predictive algorithm.  At this point I am not worried about processing power.  Going to up to 3 previous words doesn't stress a standard workstation heavily, in fact we can experiment with going higher.
+
+We'll want to build this set of Ngrams and create function that can be called by a client, which will pass in a string.  We'll parse this string and send back a result based on the greatest number of tokenized strings passed in.  Our trick will be to make this responsive to a calling client.
